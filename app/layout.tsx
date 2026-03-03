@@ -19,10 +19,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // BUG: Langless Larvitar - missing lang attribute
-    // BUG: Skipless Skarmory - no skip-to-content link anywhere
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <a
+          href="#main-content"
+          className="skip-link"
+        >
+          Skip to main content
+        </a>
+        {children}
+      </body>
     </html>
   );
 }

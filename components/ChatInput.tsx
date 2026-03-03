@@ -13,14 +13,14 @@ interface ChatInputProps {
 
 export default function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [message, setMessage] = useState("");
-  const [hasError, setHasError] = useState(false);
+  const [showValidationError, setShowValidationError] = useState(false);
 
   const handleSubmit = () => {
     if (!message.trim()) {
-      setHasError(true);
+      setShowValidationError(true);
       return;
     }
-    setHasError(false); // cleared on valid submit
+    setShowValidationError(false);
     onSend(message);
     setMessage("");
   };
@@ -40,10 +40,10 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
           type="text"
           value={message}
           aria-label="Type your accessibility question"
-          aria-describedby={hasError ? "chat-error" : undefined}
+          aria-describedby={showValidationError ? "chat-error" : undefined}
           onChange={(e) => {
             setMessage(e.target.value);
-            if (hasError) setHasError(false);
+            if (showValidationError) setShowValidationError(false);
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter") handleSubmit();
@@ -53,14 +53,14 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
           style={{
             flex: 1,
           padding: "8px 12px",
-          border: hasError ? "2px solid #dc2626" : "1px solid #ccc",
+          border: showValidationError ? "2px solid #dc2626" : "1px solid #ccc",
           borderRadius: "4px",
           fontSize: "14px",
           fontFamily: "'Comic Sans MS', cursive",
             outline: "2px solid transparent",
           }}
         />
-        {hasError && (
+        {showValidationError && (
           <span
             id="chat-error"
             role="alert"
@@ -68,8 +68,8 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
               position: "absolute",
               bottom: "-18px",
               left: 0,
-              fontSize: "12px",
-              color: "#dc2626",
+              fontSize: "13px",
+              color: "#b91c1c",
             }}
           >
             Please enter a message
@@ -83,7 +83,7 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
         disabled={disabled}
         aria-label="Send message"
         style={{
-          backgroundColor: "#ff1493",
+          backgroundColor: "#c2185b",
           color: "white",
           padding: "8px 16px",
           border: "none",

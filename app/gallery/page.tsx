@@ -73,22 +73,19 @@ export default async function GalleryPage() {
             margin: "0 auto",
           }}
         >
-          {/* BUG: Inconsistent Ivysaur - nav order is reversed vs main page */}
-          <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-            <Link
-              href="/"
-              style={{
-                color: "#94a3b8",
-                fontSize: "14px",
-                textDecoration: "underline",
-              }}
-            >
-              Back to A11yDex
-            </Link>
-          </div>
           <h1 style={{ fontSize: "24px", margin: 0, fontWeight: 700 }}>
             A11yDex Gallery
           </h1>
+          <Link
+            href="/"
+            style={{
+              color: "#cbd5e1",
+              fontSize: "14px",
+              textDecoration: "underline",
+            }}
+          >
+            Back to A11yDex
+          </Link>
         </nav>
       </header>
 
@@ -119,7 +116,7 @@ export default async function GalleryPage() {
             style={{
               textAlign: "center",
               padding: "64px 32px",
-              color: "#64748b",
+              color: "#475569",
               fontSize: "16px",
             }}
           >
@@ -197,7 +194,7 @@ export default async function GalleryPage() {
                       <div
                         style={{
                           fontSize: "13px",
-                          color: "#64748b",
+                          color: "#475569",
                         }}
                       >
                         {submission.updatedAt

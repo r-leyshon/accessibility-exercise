@@ -42,7 +42,7 @@ export default function MessageBubble({
           <div
             style={{
               fontSize: "12px",
-              color: isUser ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.6)",
+              color: isUser ? "rgba(255,255,255,0.95)" : "#0f172a",
               marginTop: "4px",
               textAlign: "right",
             }}

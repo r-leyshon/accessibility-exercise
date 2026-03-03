@@ -23,8 +23,10 @@ export default function Home() {
       <Header />
       <ScrollingTicker />
       <Disclaimer />
-      <ChatWindow />
-      <Footer />
+      <main id="main-content">
+        <ChatWindow />
+        <Footer />
+      </main>
       <Suspense fallback={null}>
         <BugTracker />
       </Suspense>

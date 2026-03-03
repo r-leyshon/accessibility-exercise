@@ -23,12 +23,12 @@ function formatTime() {
 }
 
 export default function ChatWindow() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [chatMessages, setChatMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMessages([
+    setChatMessages([
       {
         role: "assistant",
         content:
@@ -45,8 +45,8 @@ export default function ChatWindow() {
       timestamp: formatTime(),
     };
 
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
+    const updatedMessages = [...chatMessages, userMessage];
+    setChatMessages(updatedMessages);
     setIsLoading(true);
 
     try {
@@ -73,14 +73,14 @@ export default function ChatWindow() {
         timestamp: formatTime(),
       };
 
-      setMessages([...updatedMessages, assistantMessage]);
+      setChatMessages([...updatedMessages, assistantMessage]);
 
       if (reader) {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
           assistantContent += decoder.decode(value, { stream: true });
-          setMessages([
+          setChatMessages([
             ...updatedMessages,
             { ...assistantMessage, content: assistantContent },
           ]);
@@ -89,7 +89,7 @@ export default function ChatWindow() {
 
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     } catch {
-      setMessages([
+      setChatMessages([
         ...updatedMessages,
         {
           role: "assistant",
@@ -126,7 +126,7 @@ export default function ChatWindow() {
             "repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(0,0,0,0.02) 35px, rgba(0,0,0,0.02) 70px)",
         }}
       >
-        {messages.map((msg, i) => (
+        {chatMessages.map((msg, i) => (
           <MessageBubble
             key={i}
             role={msg.role}
@@ -138,8 +138,8 @@ export default function ChatWindow() {
           <div
             style={{
               padding: "8px 12px",
-              color: "#999",
-              fontSize: "13px",
+              color: "#525252",
+              fontSize: "14px",
               fontStyle: "italic",
             }}
           >

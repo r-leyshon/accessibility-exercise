@@ -14,8 +14,7 @@
 
 export default function Header() {
   return (
-    // BUG: Landmarkless Lapras - using <div> instead of <header>
-    <div
+    <header
       style={{
         backgroundColor: "#7fff00",
         padding: "8px 48px 8px 12px",
@@ -49,7 +48,7 @@ export default function Header() {
 
       <h2
         style={{
-          color: "#666",
+          color: "#2d5016",
           fontSize: "14px",
           fontWeight: "normal",
           margin: 0,
@@ -59,10 +58,10 @@ export default function Header() {
       </h2>
 
       <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-        <a href="/gallery" style={{ color: "#666", fontSize: "13px" }}>
+        <a href="/gallery" style={{ color: "#2d5016", fontSize: "14px" }}>
           View gallery
         </a>
       </div>
-    </div>
+    </header>
   );
 }
