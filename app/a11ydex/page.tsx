@@ -62,7 +62,7 @@ export default async function A11yDexPage({
     console.log("[a11ydex] page render", { searchParams: params });
   }
   const caughtIds = await getCaughtIdsFromApi(params.pr_key);
-  const showDebug = "debug" in params && params.debug !== "";
+  const showDebug = true; // temp: always show to diagnose Vercel searchParams
   const grouped = {
     Perceivable: a11ymon.filter((b) => b.principle === "Perceivable"),
     Operable: a11ymon.filter((b) => b.principle === "Operable"),
