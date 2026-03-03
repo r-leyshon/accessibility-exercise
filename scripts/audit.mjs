@@ -12,6 +12,7 @@ import { chromium } from "playwright";
 import { AxeBuilder } from "@axe-core/playwright";
 
 const url = process.argv[2];
+const bypassSecret = process.env.VERCEL_PROTECTION_BYPASS_SECRET;
 
 if (!url) {
   console.error("Usage: node scripts/audit.mjs <url>");
@@ -20,7 +21,15 @@ if (!url) {
 
 async function runAudit() {
   const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage();
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  if (bypassSecret) {
+    context.setExtraHTTPHeaders({
+      "x-vercel-protection-bypass": bypassSecret,
+      "x-vercel-set-bypass-cookie": "true",
+    });
+  }
 
   try {
     await page.goto(url, { waitUntil: "networkidle", timeout: 30000 });
