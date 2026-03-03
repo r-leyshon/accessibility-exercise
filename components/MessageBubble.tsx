@@ -28,7 +28,9 @@ export default function MessageBubble({
       <div
         style={{
           backgroundColor: isUser ? "#ff69b4" : "#20b2aa",
-          color: isUser ? "#fff" : "#1a1a1a",
+          color: isUser ? "#ffb6c1" : "#999",
+          // BUG: Contrast Cubone - #ffb6c1 on #ff69b4 ≈ 1.6:1 for user,
+          //                        #999 on #20b2aa ≈ 1.9:1 for assistant
           padding: "10px 14px",
           borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
           maxWidth: "85%",
@@ -39,10 +41,11 @@ export default function MessageBubble({
       >
         <div style={{ whiteSpace: "pre-wrap" }}>{content}</div>
         {timestamp && (
+          // BUG: Tiny Tentacool - text at 10px is too small
           <div
             style={{
-              fontSize: "12px",
-              color: isUser ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.6)",
+              fontSize: "10px",
+              color: "#ccc",
               marginTop: "4px",
               textAlign: "right",
             }}

@@ -3,7 +3,14 @@
 import { useState } from "react";
 
 /**
- * Remaining bugs: Labelless Lickitung (axe), Errorless Eevee, Tiny Target Tyrogue
+ * INTENTIONAL ACCESSIBILITY BUGS IN THIS FILE:
+ * - Labelless Lickitung (3.3.2): input has no <label> or aria-label
+ * - Buttonless Bulbasaur (4.1.2): send button has no accessible name
+ * - Divvy Ditto (4.1.2): submit uses <div onClick> instead of <button>
+ * - Errorless Eevee (3.3.1): no error message on empty submit
+ * - Colourblind Chansey (1.4.1): error indicated only by red colour
+ * - Tabindex Teddiursa (2.4.3): positive tabindex values
+ * - Tiny Target Tyrogue (2.5.8): clear button too small (for the error indicator)
  */
 
 interface ChatInputProps {
@@ -17,10 +24,12 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
 
   const handleSubmit = () => {
     if (!message.trim()) {
+      // BUG: Errorless Eevee - no visible error text
+      // BUG: Colourblind Chansey - error only shown by red colour
       setHasError(true);
       return;
     }
-    setHasError(false); // cleared on valid submit
+    setHasError(false);
     onSend(message);
     setMessage("");
   };
@@ -35,58 +44,41 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
         marginLeft: "30px",
       }}
     >
-      <div style={{ flex: 1, position: "relative" }}>
-        <input
-          type="text"
-          value={message}
-          aria-label="Type your accessibility question"
-          aria-describedby={hasError ? "chat-error" : undefined}
-          onChange={(e) => {
-            setMessage(e.target.value);
-            if (hasError) setHasError(false);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleSubmit();
-          }}
-          placeholder="Type your accessibility question..."
-          disabled={disabled}
-          style={{
-            flex: 1,
+      {/* BUG: Labelless Lickitung - no <label> or aria-label */}
+      {/* BUG: Tabindex Teddiursa - tabindex="3" disrupts tab order */}
+      <input
+        type="text"
+        tabIndex={3}
+        value={message}
+        onChange={(e) => {
+          setMessage(e.target.value);
+          if (hasError) setHasError(false);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleSubmit();
+        }}
+        placeholder="Type your accessibility question..."
+        disabled={disabled}
+        style={{
+          flex: 1,
           padding: "8px 12px",
-          border: hasError ? "2px solid #dc2626" : "1px solid #ccc",
+          border: hasError ? "2px solid red" : "1px solid #ccc",
           borderRadius: "4px",
           fontSize: "14px",
           fontFamily: "'Comic Sans MS', cursive",
-            outline: "2px solid transparent",
-          }}
-        />
-        {hasError && (
-          <span
-            id="chat-error"
-            role="alert"
-            style={{
-              position: "absolute",
-              bottom: "-18px",
-              left: 0,
-              fontSize: "12px",
-              color: "#dc2626",
-            }}
-          >
-            Please enter a message
-          </span>
-        )}
-      </div>
+          outline: "none",
+        }}
+      />
 
-      <button
-        type="button"
+      {/* BUG: Buttonless Bulbasaur - icon-only, no accessible name */}
+      {/* BUG: Divvy Ditto - <div> with onClick instead of <button> */}
+      <div
         onClick={disabled ? undefined : handleSubmit}
-        disabled={disabled}
-        aria-label="Send message"
+        tabIndex={5}
         style={{
           backgroundColor: "#ff1493",
           color: "white",
           padding: "8px 16px",
-          border: "none",
           borderRadius: "4px",
           cursor: disabled ? "not-allowed" : "pointer",
           opacity: disabled ? 0.5 : 1,
@@ -95,8 +87,8 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
           userSelect: "none",
         }}
       >
-        Send
-      </button>
+        ▶
+      </div>
     </div>
   );
 }

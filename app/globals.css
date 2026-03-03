@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 /**
- * Fixed: Focusless Fearow — was outline: none, now :focus-visible styles
+ * INTENTIONAL ACCESSIBILITY BUGS IN THIS FILE:
+ * - Focusless Fearow (2.4.7): outline: none on all interactive elements
  */
 
 :root {
@@ -17,9 +18,9 @@ body {
   padding: 0;
 }
 
-*:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
+/* BUG: Focusless Fearow - removes all focus indicators */
+*:focus {
+  outline: none;
 }
 
 a {
