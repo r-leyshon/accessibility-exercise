@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "optimize:a11ymon": "node scripts/optimize-a11ymon-images.mjs"
+    "optimize:a11ymon": "node scripts/optimize-a11ymon-images.mjs",
+    "audit:local": "node scripts/run-local-audit.mjs",
+    "audit:setup": "npx playwright install chromium"
   },
   "dependencies": {
     "@google-cloud/vertexai": "^1.10.0",
@@ -17,7 +19,9 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
     "@tailwindcss/postcss": "^4",
+    "playwright": "^1.49.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

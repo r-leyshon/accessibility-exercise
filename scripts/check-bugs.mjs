@@ -42,6 +42,7 @@ function checkBug(bug) {
   }
 
   const pattern = bug.detection.pattern;
+  const passPattern = bug.detection.passPattern;
   let patternFound;
 
   if (pattern.includes("\\s") || pattern.includes("\\d")) {
@@ -49,6 +50,14 @@ function checkBug(bug) {
     patternFound = regex.test(fileContent);
   } else {
     patternFound = fileContent.includes(pattern);
+  }
+
+  // If passPattern exists and is found, treat as fixed (e.g. lang="en" overrides <html> in comments)
+  if (patternFound && passPattern) {
+    const passRegex = new RegExp(passPattern);
+    if (passRegex.test(fileContent)) {
+      patternFound = false;
+    }
   }
 
   return {

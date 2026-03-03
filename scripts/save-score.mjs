@@ -5,20 +5,28 @@
  * Called by the workflow after each audit run.
  *
  * For PRs, uses pr_key (owner/repo#prN) so scores persist across redeploys.
+ * When axe-report.json is provided, enriches the scorecard with axe results
+ * so the saved score matches the PR comment (includes axe-verified bugs).
  *
- * Usage: node scripts/save-score.mjs <deployment_url> <scorecard.json>
+ * Usage: node scripts/save-score.mjs <deployment_url> <scorecard.json> [axe-report.json]
  * Env:   DATABASE_URL (required), GITHUB_REPOSITORY + GITHUB_PR_NUMBER (for PR-stable lookup),
  *        GITHUB_PR_AUTHOR (PR author login for gallery display)
  */
 
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
 import { neon } from "@neondatabase/serverless";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const projectRoot = resolve(__dirname, "..");
 
 const deploymentUrl = process.argv[2];
 const scorecardPath = process.argv[3];
+const axeReportPath = process.argv[4];
 
 if (!deploymentUrl || !scorecardPath) {
-  console.error("Usage: node scripts/save-score.mjs <deployment_url> <scorecard.json>");
+  console.error("Usage: node scripts/save-score.mjs <deployment_url> <scorecard.json> [axe-report.json]");
   process.exit(1);
 }
 
@@ -44,6 +52,29 @@ try {
 } catch (e) {
   console.error(`Failed to read scorecard: ${e.message}`);
   process.exit(1);
+}
+
+// Enrich with axe results when available (so saved score matches PR comment)
+if (axeReportPath && existsSync(axeReportPath)) {
+  try {
+    const axeReport = JSON.parse(readFileSync(axeReportPath, "utf-8"));
+    const a11ymon = JSON.parse(readFileSync(resolve(projectRoot, "data/a11ymon.json"), "utf-8"));
+    if (axeReport?.violations && a11ymon?.length) {
+      const violationIds = new Set(axeReport.violations.map((v) => v.id));
+      const a11ymonById = Object.fromEntries(a11ymon.map((b) => [b.id, b]));
+      scorecard = {
+        ...scorecard,
+        results: scorecard.results.map((r) => {
+          if (r.status !== "checked_by_axe") return r;
+          const ruleId = a11ymonById[r.id]?.detection?.rule;
+          if (!ruleId) return r;
+          return { ...r, fixed: !violationIds.has(ruleId) };
+        }),
+      };
+    }
+  } catch {
+    // fall back to raw scorecard
+  }
 }
 
 const caught = (scorecard.results || [])

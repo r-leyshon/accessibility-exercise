@@ -247,6 +247,7 @@
     "detection": {
       "type": "code_pattern",
       "pattern": "<html>",
+      "passPattern": "lang=[\"']en[\"']",
       "fixedWhen": "The <html> element has lang=\"en\""
     },
     "hint": "Add lang=\"en\" to the <html> element so screen readers know the page language."
