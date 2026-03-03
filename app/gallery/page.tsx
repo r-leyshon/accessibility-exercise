@@ -43,7 +43,7 @@ async function getSubmissions() {
       deployments: Deployment[];
     };
 
-    const submissions = new Map<
+    const byUsername = new Map<
       string,
       { username: string; url: string; createdAt: number }
     >();
@@ -54,16 +54,18 @@ async function getSubmissions() {
 
       const username =
         d.meta?.githubCommitAuthorLogin ?? ref.replace("access-audit/", "");
-      if (!submissions.has(username)) {
-        submissions.set(username, {
-          username,
-          url: `https://${d.url}`,
-          createdAt: d.createdAt,
-        });
+      const entry = {
+        username,
+        url: `https://${d.url}`,
+        createdAt: d.createdAt,
+      };
+      const existing = byUsername.get(username);
+      if (!existing || d.createdAt > existing.createdAt) {
+        byUsername.set(username, entry);
       }
     }
 
-    return Array.from(submissions.values());
+    return Array.from(byUsername.values());
   } catch {
     return [];
   }
