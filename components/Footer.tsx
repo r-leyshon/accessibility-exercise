@@ -3,7 +3,7 @@
 
 export default function Footer() {
   return (
-    <div
+    <footer
       style={{
         padding: "16px 48px",
         backgroundColor: "#fffde7",
@@ -40,6 +40,6 @@ export default function Footer() {
           Help
         </span>
       </div>
-    </div>
+    </footer>
   );
 }

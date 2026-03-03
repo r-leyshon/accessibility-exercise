@@ -36,7 +36,11 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
       }}
     >
       <div style={{ flex: 1, position: "relative" }}>
+        <label htmlFor="chat-input" className="visually-hidden">
+          Type your accessibility question
+        </label>
         <input
+          id="chat-input"
           type="text"
           value={message}
           aria-label="Type your accessibility question"

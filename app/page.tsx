@@ -25,8 +25,8 @@ export default function Home() {
       <Disclaimer />
       <main id="main-content">
         <ChatWindow />
-        <Footer />
       </main>
+      <Footer />
       <Suspense fallback={null}>
         <BugTracker />
       </Suspense>

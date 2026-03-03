@@ -57,11 +57,11 @@ export default function Header() {
         Gotta Fix &apos;Em All!
       </h2>
 
-      <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+      <nav aria-label="Main navigation">
         <a href="/gallery" style={{ color: "#2d5016", fontSize: "14px" }}>
           View gallery
         </a>
-      </div>
+      </nav>
     </header>
   );
 }

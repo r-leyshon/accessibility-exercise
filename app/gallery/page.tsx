@@ -65,6 +65,7 @@ export default async function GalleryPage() {
         }}
       >
         <nav
+          aria-label="Main navigation"
           style={{
             display: "flex",
             justifyContent: "space-between",
