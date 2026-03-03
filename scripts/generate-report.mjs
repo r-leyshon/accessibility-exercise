@@ -26,10 +26,27 @@ if (!scorecardPath) {
   process.exit(1);
 }
 
-const scorecard = JSON.parse(readFileSync(scorecardPath, "utf-8"));
-const axeReport = axeReportPath
-  ? JSON.parse(readFileSync(axeReportPath, "utf-8"))
-  : null;
+let scorecard;
+let axeReport = null;
+
+try {
+  scorecard = JSON.parse(readFileSync(scorecardPath, "utf-8"));
+} catch (e) {
+  console.error(`Failed to parse scorecard: ${e.message}`);
+  process.exit(1);
+}
+
+if (axeReportPath) {
+  try {
+    const content = readFileSync(axeReportPath, "utf-8");
+    const parsed = JSON.parse(content);
+    if (parsed && typeof parsed.violations !== "undefined") {
+      axeReport = parsed;
+    }
+  } catch {
+    // axe-report may contain error text if the audit failed; treat as no axe data
+  }
+}
 
 function buildScorecardMarkdown(scorecard) {
   const caught = scorecard.results.filter((r) => r.fixed === true);
