@@ -4,7 +4,7 @@ import Link from "next/link";
 
 /**
  * Gallery page — INTENTIONALLY ACCESSIBLE.
- * This page is NOT part of the exercise. It showcases intern submissions.
+ * This page is NOT part of the exercise. It showcases submissions from access-audit branches.
  *
  * INTENTIONAL ACCESSIBILITY BUG (Inconsistent Ivysaur):
  * Navigation order is reversed compared to the main page header.
@@ -20,7 +20,7 @@ interface Deployment {
   createdAt: number;
 }
 
-async function getInternDeployments() {
+async function getSubmissions() {
   const token = process.env.VERCEL_API_TOKEN;
   const projectId = process.env.VERCEL_PROJECT_ID;
 
@@ -43,19 +43,19 @@ async function getInternDeployments() {
       deployments: Deployment[];
     };
 
-    const internDeployments = new Map<
+    const submissions = new Map<
       string,
       { username: string; url: string; createdAt: number }
     >();
 
     for (const d of deployments) {
       const ref = d.meta?.githubCommitRef ?? "";
-      if (!ref.startsWith("intern/")) continue;
+      if (!ref.startsWith("access-audit/")) continue;
 
       const username =
-        d.meta?.githubCommitAuthorLogin ?? ref.replace("intern/", "");
-      if (!internDeployments.has(username)) {
-        internDeployments.set(username, {
+        d.meta?.githubCommitAuthorLogin ?? ref.replace("access-audit/", "");
+      if (!submissions.has(username)) {
+        submissions.set(username, {
           username,
           url: `https://${d.url}`,
           createdAt: d.createdAt,
@@ -63,14 +63,14 @@ async function getInternDeployments() {
       }
     }
 
-    return Array.from(internDeployments.values());
+    return Array.from(submissions.values());
   } catch {
     return [];
   }
 }
 
 export default async function GalleryPage() {
-  const interns = await getInternDeployments();
+  const submissions = await getSubmissions();
 
   return (
     <div
@@ -123,7 +123,7 @@ export default async function GalleryPage() {
         }}
       >
         <h2 style={{ fontSize: "20px", marginBottom: "8px", color: "#1e293b" }}>
-          Intern Submissions
+          Submissions
         </h2>
         <p
           style={{
@@ -133,11 +133,11 @@ export default async function GalleryPage() {
             lineHeight: 1.6,
           }}
         >
-          Each card links to an intern&apos;s accessibility-improved version of
-          the A11yDex chat app. Click a card to view their deployed site.
+          Each card links to an accessibility-improved version of the A11yDex
+          chat app. Click a card to view the deployed site.
         </p>
 
-        {interns.length === 0 ? (
+        {submissions.length === 0 ? (
           <div
             style={{
               textAlign: "center",
@@ -149,9 +149,9 @@ export default async function GalleryPage() {
             <p style={{ fontSize: "48px", marginBottom: "16px" }}>
               🎒
             </p>
-            <p>No intern submissions yet.</p>
+            <p>No submissions yet.</p>
             <p style={{ fontSize: "14px", marginTop: "8px" }}>
-              Submissions will appear here when interns open PRs from{" "}
+              Submissions will appear here when PRs are opened from{" "}
               <code
                 style={{
                   backgroundColor: "#e2e8f0",
@@ -159,7 +159,7 @@ export default async function GalleryPage() {
                   borderRadius: "4px",
                 }}
               >
-                intern/&lt;username&gt;
+                access-audit/&lt;username&gt;
               </code>{" "}
               branches.
             </p>
@@ -175,10 +175,10 @@ export default async function GalleryPage() {
               margin: 0,
             }}
           >
-            {interns.map((intern) => (
-              <li key={intern.username}>
+            {submissions.map((submission) => (
+              <li key={submission.username}>
                 <a
-                  href={intern.url}
+                  href={submission.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -201,8 +201,8 @@ export default async function GalleryPage() {
                     }}
                   >
                     <img
-                      src={`https://github.com/${intern.username}.png`}
-                      alt={`${intern.username}'s GitHub avatar`}
+                      src={`https://github.com/${submission.username}.png`}
+                      alt={`${submission.username}'s GitHub avatar`}
                       width={48}
                       height={48}
                       style={{ borderRadius: "50%" }}
@@ -214,7 +214,7 @@ export default async function GalleryPage() {
                           fontSize: "18px",
                         }}
                       >
-                        {intern.username}
+                        {submission.username}
                       </div>
                       <div
                         style={{
@@ -222,7 +222,7 @@ export default async function GalleryPage() {
                           color: "#64748b",
                         }}
                       >
-                        {new Date(intern.createdAt).toLocaleDateString(
+                        {new Date(submission.createdAt).toLocaleDateString(
                           "en-GB",
                           {
                             day: "numeric",

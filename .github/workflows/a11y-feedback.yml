@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   audit:
-    if: startsWith(github.head_ref, 'intern/')
+    if: startsWith(github.head_ref, 'access-audit/')
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
