@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import a11ymon from "@/data/a11ymon.json";
 import A11ymonImage from "@/components/A11ymonImage";
 
@@ -7,15 +8,23 @@ function getA11ymonImageSrc(id: number): string {
   return `/a11ymon/${String(id).padStart(2, "0")}.png`;
 }
 
-function parseCaughtIds(caught?: string | string[]): Set<number> {
-  const raw = Array.isArray(caught) ? caught[0] : caught;
-  if (!raw || typeof raw !== "string") return new Set();
-  return new Set(
-    raw
-      .split(",")
-      .map((s) => parseInt(s.trim(), 10))
-      .filter((n) => !isNaN(n) && n >= 1 && n <= 25)
-  );
+async function getCaughtIdsFromApi(): Promise<Set<number>> {
+  try {
+    const headersList = await headers();
+    const host = headersList.get("host") ?? headersList.get("x-forwarded-host");
+    const proto = headersList.get("x-forwarded-proto") ?? (host?.includes("localhost") ? "http" : "https");
+    if (!host) return new Set();
+
+    const res = await fetch(`${proto}://${host}/api/score`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return new Set();
+    const { caught } = (await res.json()) as { caught: number[] };
+    const ids = (caught ?? []).filter((n) => typeof n === "number" && n >= 1 && n <= 25);
+    return new Set(ids);
+  } catch {
+    return new Set();
+  }
 }
 
 const principleColours: Record<string, { bg: string; border: string; badge: string }> = {
@@ -25,13 +34,8 @@ const principleColours: Record<string, { bg: string; border: string; badge: stri
   Robust: { bg: "#fff8e1", border: "#ffb74d", badge: "#e65100" },
 };
 
-type PageProps = {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
-
-export default async function A11yDexPage({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const caughtIds = parseCaughtIds(params.caught);
+export default async function A11yDexPage() {
+  const caughtIds = await getCaughtIdsFromApi();
   const grouped = {
     Perceivable: a11ymon.filter((b) => b.principle === "Perceivable"),
     Operable: a11ymon.filter((b) => b.principle === "Operable"),

@@ -58,18 +58,9 @@ jobs:
         run: |
           node scripts/audit.mjs "${{ steps.vercel.outputs.url }}" > axe-report.json 2>&1 || true
 
-      - name: Generate AI feedback report
+      - name: Generate feedback report
         id: report
-        env:
-          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-          GCP_LOCATION: ${{ secrets.GCP_LOCATION }}
-          GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GCP_SA_KEY }}
         run: |
-          if [ -n "$GOOGLE_APPLICATION_CREDENTIALS_JSON" ]; then
-            echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > /tmp/gcp-key.json
-            export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json
-          fi
-
           if [ -f axe-report.json ]; then
             node scripts/generate-report.mjs scorecard.json axe-report.json "${{ steps.vercel.outputs.url }}" > report.md 2>&1 || true
           else
@@ -80,8 +71,15 @@ jobs:
             echo "## A11yDex Progress Report" > report.md
             echo "" >> report.md
             echo "Bug checker score: ${{ steps.bugs.outputs.score }}" >> report.md
-            echo "" >> report.md
-            echo "*AI narrative unavailable — check GCP credentials.*" >> report.md
+          fi
+
+      - name: Save score to Neon
+        if: steps.vercel.outputs.url != ''
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -n "$DATABASE_URL" ]; then
+            node scripts/save-score.mjs "${{ steps.vercel.outputs.url }}" scorecard.json
           fi
 
       - name: Post PR comment

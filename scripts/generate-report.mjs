@@ -1,19 +1,15 @@
 #!/usr/bin/env node
 
 /**
- * AI-powered feedback generator.
- * Takes the bug checker scorecard and axe audit results,
- * then uses Vertex AI (Gemini) to produce a Pokemon-themed PR comment.
+ * Feedback report generator.
+ * Takes the bug checker scorecard and axe audit results
+ * and produces a PR comment with caught/remaining tables and A11yDex link.
  *
- * Usage: node scripts/generate-report.mjs <scorecard.json> [axe-report.json]
+ * Usage: node scripts/generate-report.mjs <scorecard.json> [axe-report.json] [preview-url]
  * Output: Markdown PR comment to stdout
- *
- * Requires GCP_PROJECT_ID and GCP_LOCATION env vars (or defaults).
- * Requires application default credentials or GOOGLE_APPLICATION_CREDENTIALS.
  */
 
 import { readFileSync } from "fs";
-import { VertexAI } from "@google-cloud/vertexai";
 
 const scorecardPath = process.argv[2];
 const axeReportPath = process.argv[3];
@@ -115,62 +111,17 @@ function buildScorecardMarkdown(scorecard) {
   return md;
 }
 
-async function generateNarrative(scorecard) {
-  const project = process.env.GCP_PROJECT_ID;
-  const location = process.env.GCP_LOCATION || "europe-west2";
-
-  if (!project) {
-    return "> *Professor A11y is unavailable — GCP_PROJECT_ID not configured.*\n";
-  }
-
-  const vertexAI = new VertexAI({ project, location });
-  const model = vertexAI.getGenerativeModel({ model: "gemini-3.1-pro-preview" });
-
-  const caught = scorecard.results.filter((r) => r.fixed === true);
-  const remaining = scorecard.results.filter((r) => r.fixed === false);
-
-  const prompt = `You are Professor A11y, a friendly accessibility expert who makes subtle Pokemon references.
-
-Write a short (3-5 sentence) encouraging progress report for a developer working on an accessibility exercise.
-
-They have fixed ${caught.length} out of ${scorecard.total} accessibility bugs.
-
-${remaining.length > 0 ? `The remaining bugs are: ${remaining.map((r) => `${r.name} (WCAG ${r.wcag})`).join(", ")}.` : "They have fixed all the bugs!"}
-
-${remaining.length > 0 ? `Pick 2-3 of the remaining bugs and give brief, actionable hints for fixing them.` : `Congratulate them warmly.`}
-
-Keep the tone encouraging and professional. Use one or two subtle Pokemon references (catching bugs, evolving skills, etc). Do not use emoji.`;
-
-  try {
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-    });
-    const text =
-      result.response?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-    return `### Professor A11y Says:\n\n> ${text.split("\n").join("\n> ")}\n`;
-  } catch (err) {
-    return `### Professor A11y Says:\n\n> *Could not generate narrative: ${err.message}*\n`;
-  }
-}
-
-function buildA11yDexLink(scorecard, previewUrl) {
+function buildA11yDexLink(previewUrl) {
   if (!previewUrl || !previewUrl.startsWith("http")) return "";
   const base = previewUrl.replace(/\/$/, "");
-  const caught = scorecard.results.filter((r) => r.fixed === true);
-  const path =
-    caught.length > 0
-      ? `/a11ydex?caught=${caught.map((r) => r.id).join(",")}`
-      : "/a11ydex";
-  return `\n\n[📖 View your A11yDex progress](${base}${path})\n`;
+  return `\n\n[📖 View your A11yDex progress](${base}/a11ydex)\n`;
 }
 
-async function main() {
+function main() {
   let markdown = buildScorecardMarkdown(scorecard);
-  const narrative = await generateNarrative(scorecard);
-  markdown += narrative;
 
   if (previewUrl) {
-    markdown += buildA11yDexLink(scorecard, previewUrl);
+    markdown += buildA11yDexLink(previewUrl);
   }
 
   console.log(markdown);
