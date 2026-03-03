@@ -8,14 +8,16 @@ function getA11ymonImageSrc(id: number): string {
   return `/a11ymon/${String(id).padStart(2, "0")}.png`;
 }
 
-async function getCaughtIdsFromApi(): Promise<Set<number>> {
+async function getCaughtIdsFromApi(prKey?: string): Promise<Set<number>> {
   try {
     const headersList = await headers();
     const host = headersList.get("host") ?? headersList.get("x-forwarded-host");
     const proto = headersList.get("x-forwarded-proto") ?? (host?.includes("localhost") ? "http" : "https");
     if (!host) return new Set();
 
-    const res = await fetch(`${proto}://${host}/api/score`, {
+    const url = new URL(`${proto}://${host}/api/score`);
+    if (prKey) url.searchParams.set("pr_key", prKey);
+    const res = await fetch(url.toString(), {
       cache: "no-store",
     });
     if (!res.ok) return new Set();
@@ -34,8 +36,13 @@ const principleColours: Record<string, { bg: string; border: string; badge: stri
   Robust: { bg: "#fff8e1", border: "#ffb74d", badge: "#e65100" },
 };
 
-export default async function A11yDexPage() {
-  const caughtIds = await getCaughtIdsFromApi();
+export default async function A11yDexPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ pr_key?: string }>;
+}) {
+  const params = await searchParams;
+  const caughtIds = await getCaughtIdsFromApi(params.pr_key);
   const grouped = {
     Perceivable: a11ymon.filter((b) => b.principle === "Perceivable"),
     Operable: a11ymon.filter((b) => b.principle === "Operable"),

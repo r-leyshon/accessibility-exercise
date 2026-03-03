@@ -77,7 +77,7 @@ Open a pull request against `main` on GitHub.
 
 2. **Automated checks run** — A workflow scans your code for the bug patterns, runs an accessibility audit against the deployed preview, and generates a scorecard.
 
-3. **Feedback is posted** — A comment appears on your PR showing which A11ymon you've caught (e.g. 18/25) and what's left to fix. It includes a link to view your A11yDex progress (scores are stored per deployment, so gallery visitors see the correct count too).
+3. **Feedback is posted** — A comment appears on your PR showing which A11ymon you've caught (e.g. 18/25) and what's left to fix. It includes a link to view your A11yDex progress (scores are stored per PR, so they persist across redeploys).
 
 4. **Improve and update** — Push more fixes to your branch. Each push triggers a new deployment and updated feedback. Aim for **25/25**.
 

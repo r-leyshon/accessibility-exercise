@@ -61,10 +61,11 @@ jobs:
       - name: Generate feedback report
         id: report
         run: |
+          PR_KEY="${{ github.repository }}#pr${{ github.event.pull_request.number }}"
           if [ -f axe-report.json ]; then
-            node scripts/generate-report.mjs scorecard.json axe-report.json "${{ steps.vercel.outputs.url }}" > report.md 2>&1 || true
+            node scripts/generate-report.mjs scorecard.json axe-report.json "${{ steps.vercel.outputs.url }}" "$PR_KEY" > report.md 2>&1 || true
           else
-            node scripts/generate-report.mjs scorecard.json "" "${{ steps.vercel.outputs.url }}" > report.md 2>&1 || true
+            node scripts/generate-report.mjs scorecard.json "" "${{ steps.vercel.outputs.url }}" "$PR_KEY" > report.md 2>&1 || true
           fi
 
           if [ ! -s report.md ]; then
@@ -77,6 +78,8 @@ jobs:
         if: steps.vercel.outputs.url != ''
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           if [ -n "$DATABASE_URL" ]; then
             node scripts/save-score.mjs "${{ steps.vercel.outputs.url }}" scorecard.json
