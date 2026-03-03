@@ -1,71 +1,46 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Link from "next/link";
+import { neon } from "@neondatabase/serverless";
 
 /**
  * Gallery page — INTENTIONALLY ACCESSIBLE.
- * This page is NOT part of the exercise. It showcases submissions from access-audit branches.
+ * This page is NOT part of the exercise. It showcases submissions from access-audit PRs.
+ * Submissions come from Neon (saved by the workflow) so we use the exact deployment
+ * URL the workflow audited, not Vercel's deployment list.
  *
  * INTENTIONAL ACCESSIBILITY BUG (Inconsistent Ivysaur):
  * Navigation order is reversed compared to the main page header.
  */
 
-interface Deployment {
-  uid: string;
+export const revalidate = 120;
+
+interface Submission {
+  username: string;
   url: string;
-  meta?: {
-    githubCommitRef?: string;
-    githubCommitAuthorLogin?: string;
-  };
-  createdAt: number;
+  prKey: string;
+  updatedAt: Date | null;
 }
 
-async function getSubmissions() {
-  const token = process.env.VERCEL_API_TOKEN;
-  const projectId = process.env.VERCEL_PROJECT_ID;
-
-  if (!token || !projectId) {
-    return [];
-  }
+async function getSubmissions(): Promise<Submission[]> {
+  const dbUrl = process.env.DATABASE_URL;
+  if (!dbUrl) return [];
 
   try {
-    const res = await fetch(
-      `https://api.vercel.com/v6/deployments?projectId=${projectId}&target=preview&limit=100`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        next: { revalidate: 120 },
-      }
-    );
+    const sql = neon(dbUrl);
+    const rows = (await sql`
+      SELECT deployment_url, pr_key, username, updated_at
+      FROM deployment_scores
+      WHERE pr_key IS NOT NULL AND username IS NOT NULL
+      ORDER BY updated_at DESC
+    `) as Array<{ deployment_url: string; pr_key: string; username: string; updated_at: string | null }>;
 
-    if (!res.ok) return [];
-
-    const { deployments } = (await res.json()) as {
-      deployments: Deployment[];
-    };
-
-    const byUsername = new Map<
-      string,
-      { username: string; url: string; createdAt: number }
-    >();
-
-    for (const d of deployments) {
-      const ref = d.meta?.githubCommitRef ?? "";
-      if (!ref.startsWith("access-audit/")) continue;
-
-      const username =
-        d.meta?.githubCommitAuthorLogin ?? ref.replace("access-audit/", "");
-      const entry = {
-        username,
-        url: `https://${d.url}`,
-        createdAt: d.createdAt,
-      };
-      const existing = byUsername.get(username);
-      if (!existing || d.createdAt > existing.createdAt) {
-        byUsername.set(username, entry);
-      }
-    }
-
-    return Array.from(byUsername.values());
+    return rows.map((r) => ({
+      username: r.username,
+      url: `${r.deployment_url.replace(/\/$/, "")}/?pr_key=${encodeURIComponent(r.pr_key)}`,
+      prKey: r.pr_key,
+      updatedAt: r.updated_at ? new Date(r.updated_at) : null,
+    }));
   } catch {
     return [];
   }
@@ -153,7 +128,8 @@ export default async function GalleryPage() {
             </p>
             <p>No submissions yet.</p>
             <p style={{ fontSize: "14px", marginTop: "8px" }}>
-              Submissions will appear here when PRs are opened from{" "}
+              Submissions will appear here when the audit workflow runs on PRs
+              from{" "}
               <code
                 style={{
                   backgroundColor: "#e2e8f0",
@@ -178,7 +154,7 @@ export default async function GalleryPage() {
             }}
           >
             {submissions.map((submission) => (
-              <li key={submission.username}>
+              <li key={submission.prKey}>
                 <a
                   href={submission.url}
                   target="_blank"
@@ -224,14 +200,13 @@ export default async function GalleryPage() {
                           color: "#64748b",
                         }}
                       >
-                        {new Date(submission.createdAt).toLocaleDateString(
-                          "en-GB",
-                          {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          }
-                        )}
+                        {submission.updatedAt
+                          ? submission.updatedAt.toLocaleDateString("en-GB", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : "—"}
                       </div>
                     </div>
                   </div>

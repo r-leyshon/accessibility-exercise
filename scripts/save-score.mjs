@@ -7,7 +7,8 @@
  * For PRs, uses pr_key (owner/repo#prN) so scores persist across redeploys.
  *
  * Usage: node scripts/save-score.mjs <deployment_url> <scorecard.json>
- * Env:   DATABASE_URL (required), GITHUB_REPOSITORY + GITHUB_PR_NUMBER (for PR-stable lookup)
+ * Env:   DATABASE_URL (required), GITHUB_REPOSITORY + GITHUB_PR_NUMBER (for PR-stable lookup),
+ *        GITHUB_PR_AUTHOR (PR author login for gallery display)
  */
 
 import { readFileSync } from "fs";
@@ -34,6 +35,7 @@ const normalizedUrl = deploymentUrl.replace(/\/$/, "").startsWith("http")
 
 const repo = process.env.GITHUB_REPOSITORY;
 const prNum = process.env.GITHUB_PR_NUMBER;
+const prAuthor = process.env.GITHUB_PR_AUTHOR;
 const prKey = repo && prNum ? `${repo}#pr${prNum}` : null;
 
 let scorecard;
@@ -54,10 +56,14 @@ const sql = neon(dbUrl);
 try {
   if (prKey) {
     await sql`
-      INSERT INTO deployment_scores (deployment_url, pr_key, caught)
-      VALUES (${normalizedUrl}, ${prKey}, ${caught})
+      INSERT INTO deployment_scores (deployment_url, pr_key, username, caught)
+      VALUES (${normalizedUrl}, ${prKey}, ${prAuthor ?? null}, ${caught})
       ON CONFLICT (pr_key)
-      DO UPDATE SET deployment_url = EXCLUDED.deployment_url, caught = EXCLUDED.caught, updated_at = NOW()
+      DO UPDATE SET
+        deployment_url = EXCLUDED.deployment_url,
+        username = COALESCE(EXCLUDED.username, deployment_scores.username),
+        caught = EXCLUDED.caught,
+        updated_at = NOW()
     `;
     console.log(`Saved score for ${prKey} (${normalizedUrl}): ${caught.length} A11ymon caught`);
   } else {
