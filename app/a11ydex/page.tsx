@@ -55,13 +55,14 @@ const principleColours: Record<string, { bg: string; border: string; badge: stri
 export default async function A11yDexPage({
   searchParams,
 }: {
-  searchParams: Promise<{ pr_key?: string }>;
+  searchParams: Promise<{ pr_key?: string; debug?: string }>;
 }) {
   const params = await searchParams;
   if (process.env.NODE_ENV === "development" || process.env.A11YDEX_DEBUG) {
     console.log("[a11ydex] page render", { searchParams: params });
   }
   const caughtIds = await getCaughtIdsFromApi(params.pr_key);
+  const showDebug = "debug" in params && params.debug !== "";
   const grouped = {
     Perceivable: a11ymon.filter((b) => b.principle === "Perceivable"),
     Operable: a11ymon.filter((b) => b.principle === "Operable"),
@@ -78,6 +79,19 @@ export default async function A11yDexPage({
         color: "#e0e0e0",
       }}
     >
+      {showDebug && (
+        <div
+          style={{
+            padding: "12px 24px",
+            backgroundColor: "#333",
+            color: "#0f0",
+            fontFamily: "monospace",
+            fontSize: "12px",
+          }}
+        >
+          Debug: pr_key=&quot;{params.pr_key ?? "(none)"}&quot; | caughtIds: {[...caughtIds].join(",") || "(none)"} | count: {caughtIds.size}
+        </div>
+      )}
       <div
         style={{
           backgroundColor: "#dc2626",
