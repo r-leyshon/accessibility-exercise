@@ -11,22 +11,36 @@ function getA11ymonImageSrc(id: number): string {
 }
 
 async function getCaughtIdsFromApi(prKey?: string): Promise<Set<number>> {
+  const log = (msg: string, data?: unknown) => {
+    if (process.env.NODE_ENV === "development" || process.env.A11YDEX_DEBUG) {
+      console.log(`[a11ydex] ${msg}`, data ?? "");
+    }
+  };
   try {
     const headersList = await headers();
     const host = headersList.get("host") ?? headersList.get("x-forwarded-host");
     const proto = headersList.get("x-forwarded-proto") ?? (host?.includes("localhost") ? "http" : "https");
-    if (!host) return new Set();
+    if (!host) {
+      log("no host, returning empty");
+      return new Set();
+    }
 
     const url = new URL(`${proto}://${host}/api/score`);
     if (prKey) url.searchParams.set("pr_key", prKey);
+    log("fetching api", { url: url.toString(), prKey });
     const res = await fetch(url.toString(), {
       cache: "no-store",
     });
-    if (!res.ok) return new Set();
+    if (!res.ok) {
+      log("api not ok", { status: res.status });
+      return new Set();
+    }
     const { caught } = (await res.json()) as { caught: number[] };
     const ids = (caught ?? []).filter((n) => typeof n === "number" && n >= 1 && n <= 25);
+    log("api result", { caught, ids, count: ids.length });
     return new Set(ids);
-  } catch {
+  } catch (err) {
+    log("fetch error", err);
     return new Set();
   }
 }
@@ -44,6 +58,9 @@ export default async function A11yDexPage({
   searchParams: Promise<{ pr_key?: string }>;
 }) {
   const params = await searchParams;
+  if (process.env.NODE_ENV === "development" || process.env.A11YDEX_DEBUG) {
+    console.log("[a11ydex] page render", { searchParams: params });
+  }
   const caughtIds = await getCaughtIdsFromApi(params.pr_key);
   const grouped = {
     Perceivable: a11ymon.filter((b) => b.principle === "Perceivable"),

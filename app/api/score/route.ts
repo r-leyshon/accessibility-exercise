@@ -24,6 +24,13 @@ export async function GET(req: NextRequest) {
       : null;
   const prKey = prKeyFromQuery || prKeyFromEnv;
 
+  const log = (msg: string, data?: unknown) => {
+    if (process.env.NODE_ENV === "development" || process.env.A11YDEX_DEBUG) {
+      console.log(`[api/score] ${msg}`, data ?? "");
+    }
+  };
+  log("request", { host, deploymentUrl, prKeyFromQuery, prKeyFromEnv, prKey });
+
   try {
     const sql = neon(dbUrl);
     let rows: Array<{ caught?: unknown }> = [];
@@ -34,6 +41,7 @@ export async function GET(req: NextRequest) {
         SELECT caught FROM deployment_scores
         WHERE pr_key = ${prKey}
       `;
+      log("pr_key lookup", { prKey, rowCount: rows.length, caught: rows[0]?.caught });
     }
 
     // Fallback: lookup by deployment URL (production or legacy)
@@ -42,14 +50,17 @@ export async function GET(req: NextRequest) {
         SELECT caught FROM deployment_scores
         WHERE deployment_url = ${deploymentUrl}
       `;
+      log("deployment_url lookup", { deploymentUrl, rowCount: rows.length, caught: rows[0]?.caught });
     }
 
     const raw = rows[0]?.caught ?? [];
     const ids = Array.isArray(raw)
       ? raw.filter((n): n is number => typeof n === "number" && n >= 1 && n <= 25)
       : [];
+    log("response", { ids, count: ids.length });
     return Response.json({ caught: ids });
-  } catch {
+  } catch (err) {
+    log("error", err);
     return Response.json({ caught: [] });
   }
 }
