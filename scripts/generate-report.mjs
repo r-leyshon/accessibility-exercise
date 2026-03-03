@@ -4,6 +4,7 @@
  * Feedback report generator.
  * Takes the bug checker scorecard and axe audit results
  * and produces a PR comment with caught/remaining tables and A11yDex link.
+ * Uses axe-core violations to resolve axe_rule bugs (landmarks, skip link, labels, etc).
  *
  * Usage: node scripts/generate-report.mjs <scorecard.json> [axe-report.json] [preview-url] [pr-key]
  * Output: Markdown PR comment to stdout
@@ -11,6 +12,11 @@
  */
 
 import { readFileSync } from "fs";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const projectRoot = resolve(__dirname, "..");
 
 const scorecardPath = process.argv[2];
 const axeReportPath = process.argv[3];
@@ -26,6 +32,7 @@ if (!scorecardPath) {
 
 let scorecard;
 let axeReport = null;
+let a11ymon = [];
 
 try {
   scorecard = JSON.parse(readFileSync(scorecardPath, "utf-8"));
@@ -46,12 +53,36 @@ if (axeReportPath) {
   }
 }
 
+try {
+  a11ymon = JSON.parse(readFileSync(resolve(projectRoot, "data/a11ymon.json"), "utf-8"));
+} catch {
+  // optional; axe enrichment will be skipped
+}
+
+/**
+ * Enrich scorecard with axe-core results.
+ * For bugs detected by axe_rule, set fixed=true if the rule passed (not in violations).
+ */
+function enrichScorecardWithAxe(scorecard, axeReport, a11ymon) {
+  if (!axeReport || !a11ymon?.length) return scorecard;
+  const violationIds = new Set(axeReport.violations?.map((v) => v.id) ?? []);
+
+  const a11ymonById = Object.fromEntries(a11ymon.map((b) => [b.id, b]));
+  const enrichedResults = scorecard.results.map((r) => {
+    if (r.status !== "checked_by_axe") return r;
+    const ruleId = a11ymonById[r.id]?.detection?.rule;
+    if (!ruleId) return r;
+    return { ...r, fixed: !violationIds.has(ruleId) };
+  });
+
+  const fixed = enrichedResults.filter((r) => r.fixed).length;
+  return { ...scorecard, results: enrichedResults, fixed, score: `${fixed} / ${scorecard.total}` };
+}
+
 function buildScorecardMarkdown(scorecard) {
   const caught = scorecard.results.filter((r) => r.fixed === true);
   const remaining = scorecard.results.filter((r) => r.fixed === false);
-  const manual = scorecard.results.filter(
-    (r) => r.status === "manual_check_required" || r.status === "checked_by_axe"
-  );
+  const manual = scorecard.results.filter((r) => r.status === "manual_check_required");
 
   let md = `## A11yDex Progress Report\n\n`;
   md += `**${scorecard.fixed} / ${scorecard.total} A11ymon caught!**`;
@@ -91,7 +122,7 @@ function buildScorecardMarkdown(scorecard) {
     md += `| # | A11ymon | WCAG | Note |\n`;
     md += `|---|---------|------|------|\n`;
     for (const r of manual) {
-      md += `| ${r.id} | ${r.name} | ${r.wcag} | ${r.status === "checked_by_axe" ? "Verified by axe-core runtime audit" : "Requires manual testing"} |\n`;
+      md += `| ${r.id} | ${r.name} | ${r.wcag} | Requires manual testing |\n`;
     }
     md += `\n`;
   }
@@ -121,7 +152,8 @@ function buildA11yDexLink(previewUrl, prKey) {
 }
 
 function main() {
-  let markdown = buildScorecardMarkdown(scorecard);
+  const enriched = enrichScorecardWithAxe(scorecard, axeReport, a11ymon);
+  let markdown = buildScorecardMarkdown(enriched);
 
   if (previewUrl) {
     markdown += buildA11yDexLink(previewUrl, prKey);

@@ -104,3 +104,21 @@ When you open a PR, the workflow runs these tools:
 | **Report generator** | Merges the pattern checker and axe results into the PR comment, plus a link to your A11yDex progress page. |
 
 The workflow waits for your Vercel preview to be ready, then audits that deployed URL (not your local code). Both checks feed into your final score and feedback.
+
+### Running the audit locally
+
+Run the same checks as CI with a single command:
+
+```bash
+npm run audit:local
+```
+
+The script will:
+
+1. Run the bug pattern checker (scans source for patterns in `a11ymon.json`)
+2. Start the dev server if it isn't already running
+3. Install Playwright Chromium if needed
+4. Run the axe-core audit against `http://localhost:3000`
+5. Write `report.md` with your progress
+
+If the axe audit fails (e.g. first run before Chromium finishes installing), you still get the pattern checker results. Run `npx playwright install chromium` once manually if needed.
