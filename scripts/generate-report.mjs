@@ -111,22 +111,17 @@ function buildScorecardMarkdown(scorecard) {
   return md;
 }
 
-function buildA11yDexLink(scorecard, previewUrl) {
+function buildA11yDexLink(previewUrl) {
   if (!previewUrl || !previewUrl.startsWith("http")) return "";
   const base = previewUrl.replace(/\/$/, "");
-  const caught = scorecard.results.filter((r) => r.fixed === true);
-  const path =
-    caught.length > 0
-      ? `/a11ydex?caught=${caught.map((r) => r.id).join(",")}`
-      : "/a11ydex";
-  return `\n\n[📖 View your A11yDex progress](${base}${path})\n`;
+  return `\n\n[📖 View your A11yDex progress](${base}/a11ydex)\n`;
 }
 
 function main() {
   let markdown = buildScorecardMarkdown(scorecard);
 
   if (previewUrl) {
-    markdown += buildA11yDexLink(scorecard, previewUrl);
+    markdown += buildA11yDexLink(previewUrl);
   }
 
   console.log(markdown);
