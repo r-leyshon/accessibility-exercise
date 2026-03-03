@@ -3,6 +3,7 @@ import ScrollingTicker from "@/components/ScrollingTicker";
 import Disclaimer from "@/components/Disclaimer";
 import ChatWindow from "@/components/ChatWindow";
 import BugTracker from "@/components/BugTracker";
+import Footer from "@/components/Footer";
 
 /**
  * INTENTIONAL DESIGN SINS:
@@ -22,6 +23,7 @@ export default function Home() {
       <ScrollingTicker />
       <Disclaimer />
       <ChatWindow />
+      <Footer />
       <BugTracker />
     </div>
   );

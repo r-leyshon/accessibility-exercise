@@ -1,10 +1,5 @@
 "use client";
 
-/**
- * INTENTIONAL ACCESSIBILITY BUGS IN THIS FILE:
- * - Contrast Cubone (1.4.3): low contrast text (#999 on #fff)
- * - Tiny Tentacool (1.4.4): timestamp at 10px font size
- */
 
 interface MessageBubbleProps {
   role: "user" | "assistant";
