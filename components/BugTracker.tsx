@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 /**
  * INTENTIONAL ACCESSIBILITY BUGS IN THIS FILE:
@@ -10,9 +12,27 @@ import Link from "next/link";
  */
 
 export default function BugTracker() {
+  const searchParams = useSearchParams();
+  const prKey = searchParams.get("pr_key");
+  const [caught, setCaught] = useState<number | null>(null);
+
+  useEffect(() => {
+    const url = new URL("/api/score", window.location.origin);
+    if (prKey) url.searchParams.set("pr_key", prKey);
+    fetch(url.toString(), { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : { caught: [] }))
+      .then((data: { caught?: number[] }) => {
+        const ids = (data.caught ?? []).filter((n) => typeof n === "number" && n >= 1 && n <= 25);
+        setCaught(ids.length);
+      })
+      .catch(() => setCaught(null));
+  }, [prKey]);
+
+  const href = prKey ? `/a11ydex?pr_key=${encodeURIComponent(prKey)}` : "/a11ydex";
+
   return (
     <Link
-      href="/a11ydex"
+      href={href}
       style={{
         position: "fixed",
         bottom: "16px",
@@ -48,7 +68,7 @@ export default function BugTracker() {
         A11yDex
       </h5>
       <div style={{ fontSize: "20px", fontWeight: "bold" }}>
-        00 / 25
+        {caught !== null ? `${caught} / 25` : "… / 25"}
       </div>
       <div style={{ fontSize: "10px", marginTop: "2px" }}>
         A11ymon caught

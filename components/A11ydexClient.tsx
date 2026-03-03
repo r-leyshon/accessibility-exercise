@@ -32,9 +32,8 @@ export default function A11ydexClient({ a11ymon }: { a11ymon: A11ymonBug[] }) {
   const [caughtIds, setCaughtIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    if (!prKey) return;
     const url = new URL("/api/score", window.location.origin);
-    url.searchParams.set("pr_key", prKey);
+    if (prKey) url.searchParams.set("pr_key", prKey);
     fetch(url.toString(), { cache: "no-store" })
       .then((res) => (res.ok ? res.json() : { caught: [] }))
       .then((data: { caught?: number[] }) => {
@@ -98,7 +97,7 @@ export default function A11ydexClient({ a11ymon }: { a11ymon: A11ymonBug[] }) {
           </p>
         </div>
         <Link
-          href="/"
+          href={prKey ? `/?pr_key=${encodeURIComponent(prKey)}` : "/"}
           style={{
             color: "#fca5a5",
             fontSize: "14px",

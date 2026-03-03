@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Header from "@/components/Header";
 import ScrollingTicker from "@/components/ScrollingTicker";
 import Disclaimer from "@/components/Disclaimer";
@@ -24,7 +25,9 @@ export default function Home() {
       <Disclaimer />
       <ChatWindow />
       <Footer />
-      <BugTracker />
+      <Suspense fallback={null}>
+        <BugTracker />
+      </Suspense>
     </div>
   );
 }
