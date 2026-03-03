@@ -27,38 +27,41 @@ export default function Header() {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        {/* BUG: Decorative Diglett - decorative image not hidden from assistive tech */}
-        <img src="/pokeball.svg" width={40} height={40} />
-
-        {/* BUG: Imagey Igglybuff - title as image of text instead of real text */}
-        {/* BUG: Altless Abra - missing alt attribute */}
-        <img src="/header-text.svg" width={200} height={40} />
+        <img
+          src="/pokeball.svg"
+          width={40}
+          height={40}
+          alt=""
+          aria-hidden="true"
+        />
+        <h1
+          style={{
+            margin: 0,
+            fontSize: "24px",
+            fontWeight: "bold",
+            color: "#333",
+            fontFamily: "'Comic Sans MS', cursive",
+          }}
+        >
+          A11yDex
+        </h1>
       </div>
 
-      {/* BUG: Heading Haunter - skips from h1 (implied) to h3 */}
-      <h3
+      <h2
         style={{
-          color: "#999",
+          color: "#666",
           fontSize: "14px",
           fontWeight: "normal",
           margin: 0,
         }}
       >
         Gotta Fix &apos;Em All!
-      </h3>
+      </h2>
 
       <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-        {/* BUG: Vague Vulpix - vague link text */}
-        <a
-          href="/gallery"
-          style={{ color: "#999", fontSize: "13px" }}
-          tabIndex={5}
-        >
-          Click here
+        <a href="/gallery" style={{ color: "#666", fontSize: "13px" }}>
+          View gallery
         </a>
-
-        {/* BUG: Linkless Ledyba - empty link */}
-        <a href="#"></a>
       </div>
     </div>
   );
