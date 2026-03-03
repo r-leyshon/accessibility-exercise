@@ -9,9 +9,8 @@ import "./globals.css";
  */
 
 export const metadata: Metadata = {
-  // BUG: Titleless Togepi - generic unhelpful title
-  title: "page",
-  description: "",
+  title: "A11yDex - Accessibility Chat Assistant",
+  description: "Find and fix accessibility bugs in this chat app",
 };
 
 export default function RootLayout({
@@ -22,7 +21,7 @@ export default function RootLayout({
   return (
     // BUG: Langless Larvitar - missing lang attribute
     // BUG: Skipless Skarmory - no skip-to-content link anywhere
-    <html>
+    <html lang="en">
       <body>{children}</body>
     </html>
   );

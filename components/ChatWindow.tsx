@@ -110,11 +110,13 @@ export default function ChatWindow() {
         display: "flex",
         flexDirection: "column",
         height: "calc(100vh - 60px)",
-        overflow: "hidden",
+        overflow: "auto",
       }}
     >
       {/* BUG: Statusless Snorlax - no aria-live region */}
       <div
+        aria-live="polite"
+        aria-label="Chat messages"
         style={{
           flex: 1,
           overflowY: "auto",
