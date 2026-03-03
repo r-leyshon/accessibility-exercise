@@ -1,0 +1,117 @@
+name: A11yDex Accessibility Audit
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  deployments: read
+
+jobs:
+  audit:
+    if: startsWith(github.head_ref, 'intern/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run custom bug pattern checker
+        id: bugs
+        run: |
+          node scripts/check-bugs.mjs > scorecard.json
+          echo "score=$(cat scorecard.json | node -e "const s=require('fs').readFileSync('/dev/stdin','utf8');const d=JSON.parse(s);console.log(d.score)")" >> $GITHUB_OUTPUT
+
+      - name: Wait for Vercel preview deployment
+        id: vercel
+        uses: patrickedqvist/wait-for-vercel-preview@v1.3.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          max_timeout: 300
+          check_interval: 10
+          environment: "Preview"
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Run axe-core audit against preview
+        id: axe
+        if: steps.vercel.outputs.url != ''
+        run: |
+          node scripts/audit.mjs "${{ steps.vercel.outputs.url }}" > axe-report.json 2>&1 || true
+
+      - name: Generate AI feedback report
+        id: report
+        env:
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_LOCATION: ${{ secrets.GCP_LOCATION }}
+          GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GCP_SA_KEY }}
+        run: |
+          if [ -n "$GOOGLE_APPLICATION_CREDENTIALS_JSON" ]; then
+            echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > /tmp/gcp-key.json
+            export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json
+          fi
+
+          if [ -f axe-report.json ]; then
+            node scripts/generate-report.mjs scorecard.json axe-report.json "${{ steps.vercel.outputs.url }}" > report.md 2>&1 || true
+          else
+            node scripts/generate-report.mjs scorecard.json "" "${{ steps.vercel.outputs.url }}" > report.md 2>&1 || true
+          fi
+
+          if [ ! -s report.md ]; then
+            echo "## A11yDex Progress Report" > report.md
+            echo "" >> report.md
+            echo "Bug checker score: ${{ steps.bugs.outputs.score }}" >> report.md
+            echo "" >> report.md
+            echo "*AI narrative unavailable — check GCP credentials.*" >> report.md
+          fi
+
+      - name: Post PR comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('report.md', 'utf-8');
+
+            const marker = '<!-- a11ydex-audit -->';
+            const body = `${marker}\n${report}`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c => c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }

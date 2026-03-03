@@ -1,0 +1,351 @@
+[
+  {
+    "id": 1,
+    "name": "Altless Abra",
+    "wcag": "1.1.1",
+    "principle": "Perceivable",
+    "description": "Header logo <img> is missing an alt attribute, so screen readers cannot describe it.",
+    "file": "components/Header.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "<img src=\"/header-text.svg\"",
+      "fixedWhen": "alt attribute is present on the header-text.svg image"
+    },
+    "hint": "Add a descriptive alt attribute to the <img> element, or if it is decorative, use alt=\"\"."
+  },
+  {
+    "id": 2,
+    "name": "Decorative Diglett",
+    "wcag": "1.1.1",
+    "principle": "Perceivable",
+    "description": "The pokeball decorative image is exposed to screen readers. It should be hidden from assistive technology.",
+    "file": "components/Header.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "<img src=\"/pokeball.svg\"",
+      "fixedWhen": "pokeball image has aria-hidden=\"true\" or alt=\"\""
+    },
+    "hint": "Decorative images should have alt=\"\" or aria-hidden=\"true\" so screen readers skip them."
+  },
+  {
+    "id": 3,
+    "name": "Imagey Igglybuff",
+    "wcag": "1.4.5",
+    "principle": "Perceivable",
+    "description": "The site title 'A11yDex' is rendered as an image of text instead of real text.",
+    "file": "components/Header.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "header-text.svg",
+      "fixedWhen": "Site title is rendered as a real text element (e.g. <h1>) not an image"
+    },
+    "hint": "Replace the image of text with a real <h1> text element. Use CSS for styling instead."
+  },
+  {
+    "id": 4,
+    "name": "Contrast Cubone",
+    "wcag": "1.4.3",
+    "principle": "Perceivable",
+    "description": "Multiple text elements have insufficient colour contrast ratios (below 4.5:1).",
+    "file": "components/MessageBubble.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "color: \"#999\"",
+      "fixedWhen": "All text has a contrast ratio of at least 4.5:1 against its background"
+    },
+    "hint": "Use a colour contrast checker to ensure text meets the 4.5:1 ratio for normal text."
+  },
+  {
+    "id": 5,
+    "name": "Tiny Tentacool",
+    "wcag": "1.4.4",
+    "principle": "Perceivable",
+    "description": "Timestamp text is set to font-size: 10px, which is too small to read comfortably.",
+    "file": "components/MessageBubble.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "fontSize: \"10px\"",
+      "fixedWhen": "No text is smaller than 12px (ideally 16px for body text)"
+    },
+    "hint": "Ensure all text is at least 12px, and body text is at least 16px. Use relative units (rem/em)."
+  },
+  {
+    "id": 6,
+    "name": "Colourblind Chansey",
+    "wcag": "1.4.1",
+    "principle": "Perceivable",
+    "description": "Error states on the chat input are indicated only by a red border colour, with no icon or text.",
+    "file": "components/ChatInput.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "\"2px solid red\"",
+      "fixedWhen": "Error states include text or an icon in addition to colour"
+    },
+    "hint": "Never use colour as the sole means of conveying information. Add an error message or icon."
+  },
+  {
+    "id": 7,
+    "name": "Zoomy Zubat",
+    "wcag": "1.4.10",
+    "principle": "Perceivable",
+    "description": "The chat container uses overflow: hidden, which clips content when the page is zoomed to 400%.",
+    "file": "components/ChatWindow.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "overflow: \"hidden\"",
+      "fixedWhen": "Content reflows properly at 400% zoom without being clipped"
+    },
+    "hint": "Replace overflow: hidden with overflow: auto or visible, and ensure content reflows at high zoom levels."
+  },
+  {
+    "id": 8,
+    "name": "Landmarkless Lapras",
+    "wcag": "1.3.1",
+    "principle": "Perceivable",
+    "description": "The page uses only <div> elements with no semantic HTML landmarks (<header>, <main>, <nav>, <footer>).",
+    "file": "components/Header.tsx",
+    "detection": {
+      "type": "axe_rule",
+      "rule": "landmark-one-main",
+      "fixedWhen": "Page has <header>, <main>, and <footer> landmarks"
+    },
+    "hint": "Replace <div> wrappers with semantic HTML elements: <header>, <main>, <nav>, <footer>."
+  },
+  {
+    "id": 9,
+    "name": "Heading Haunter",
+    "wcag": "1.3.1",
+    "principle": "Perceivable",
+    "description": "Heading levels are skipped: <h1> is missing, then <h3> appears, then <h5>.",
+    "file": "components/Header.tsx",
+    "detection": {
+      "type": "axe_rule",
+      "rule": "heading-order",
+      "fixedWhen": "Heading levels are sequential (h1, h2, h3) with no skips"
+    },
+    "hint": "Start with <h1> and increase sequentially. Never skip levels (e.g. h1 → h3)."
+  },
+  {
+    "id": 10,
+    "name": "Skipless Skarmory",
+    "wcag": "2.4.1",
+    "principle": "Operable",
+    "description": "There is no 'skip to main content' link, forcing keyboard users to tab through all navigation.",
+    "file": "app/layout.tsx",
+    "detection": {
+      "type": "axe_rule",
+      "rule": "bypass",
+      "fixedWhen": "A skip-to-content link is present as the first focusable element"
+    },
+    "hint": "Add a visually-hidden skip link as the first element in <body> that jumps to the main content."
+  },
+  {
+    "id": 11,
+    "name": "Titleless Togepi",
+    "wcag": "2.4.2",
+    "principle": "Operable",
+    "description": "The page <title> is set to 'page', which is generic and unhelpful.",
+    "file": "app/layout.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "title: \"page\"",
+      "fixedWhen": "Page title is descriptive (e.g. 'A11yDex - Accessibility Chat Assistant')"
+    },
+    "hint": "Set a descriptive, unique page title that tells users what the page is about."
+  },
+  {
+    "id": 12,
+    "name": "Focusless Fearow",
+    "wcag": "2.4.7",
+    "principle": "Operable",
+    "description": "All focus indicators are removed with outline: none, making it impossible for keyboard users to see where they are.",
+    "file": "app/globals.css",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "outline: none",
+      "fixedWhen": "Focus indicators are visible on all interactive elements"
+    },
+    "hint": "Remove the global outline: none rule. Add visible focus styles (:focus-visible) to interactive elements."
+  },
+  {
+    "id": 13,
+    "name": "Vague Vulpix",
+    "wcag": "2.4.4",
+    "principle": "Operable",
+    "description": "A link uses the text 'Click here' with no context about where it leads.",
+    "file": "components/Header.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "Click here",
+      "fixedWhen": "Link text is descriptive (e.g. 'View gallery' or 'Intern submissions')"
+    },
+    "hint": "Link text should describe the destination. Replace 'Click here' with meaningful text."
+  },
+  {
+    "id": 14,
+    "name": "Tabindex Teddiursa",
+    "wcag": "2.4.3",
+    "principle": "Operable",
+    "description": "Elements have positive tabindex values (tabindex='3', tabindex='5'), creating an illogical tab order.",
+    "file": "components/ChatInput.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "tabIndex={5}",
+      "fixedWhen": "No positive tabindex values exist (only 0 or -1)"
+    },
+    "hint": "Remove all positive tabindex values. Use tabindex='0' for focusable elements or '-1' for programmatic focus."
+  },
+  {
+    "id": 15,
+    "name": "Trapped Tangela",
+    "wcag": "2.1.2",
+    "principle": "Operable",
+    "description": "The custom dropdown in the disclaimer traps keyboard focus — users can tab in but cannot tab out or close it with Escape.",
+    "file": "components/Disclaimer.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "Learn more",
+      "fixedWhen": "Dropdown can be closed with Escape and focus returns to the trigger element"
+    },
+    "hint": "Add an Escape key handler to close the dropdown and return focus to the trigger button."
+  },
+  {
+    "id": 16,
+    "name": "Marquee Magikarp",
+    "wcag": "2.2.2",
+    "principle": "Operable",
+    "description": "The scrolling ticker auto-plays with no way to pause, stop, or hide it.",
+    "file": "components/ScrollingTicker.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "scroll-ticker",
+      "fixedWhen": "Ticker has a visible pause/stop button, or is removed entirely"
+    },
+    "hint": "Add a pause/stop button for auto-moving content, or use prefers-reduced-motion to disable animation."
+  },
+  {
+    "id": 17,
+    "name": "Tiny Target Tyrogue",
+    "wcag": "2.5.8",
+    "principle": "Operable",
+    "description": "The close button on the disclaimer is only 16x16 pixels, below the 24x24px minimum target size.",
+    "file": "components/Disclaimer.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "width: \"16px\"",
+      "fixedWhen": "All interactive targets are at least 24x24px"
+    },
+    "hint": "Increase the close button to at least 24x24px. Use padding to increase the touch/click target."
+  },
+  {
+    "id": 18,
+    "name": "Langless Larvitar",
+    "wcag": "3.1.1",
+    "principle": "Understandable",
+    "description": "The <html> element is missing the lang attribute, so screen readers cannot determine the page language.",
+    "file": "app/layout.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "<html>",
+      "fixedWhen": "The <html> element has lang=\"en\""
+    },
+    "hint": "Add lang=\"en\" to the <html> element so screen readers know the page language."
+  },
+  {
+    "id": 19,
+    "name": "Labelless Lickitung",
+    "wcag": "3.3.2",
+    "principle": "Understandable",
+    "description": "The chat input field has no associated <label> or aria-label.",
+    "file": "components/ChatInput.tsx",
+    "detection": {
+      "type": "axe_rule",
+      "rule": "label",
+      "fixedWhen": "Input has an associated <label> element or aria-label attribute"
+    },
+    "hint": "Add a <label> element linked by htmlFor/id, or add an aria-label attribute to the input."
+  },
+  {
+    "id": 20,
+    "name": "Errorless Eevee",
+    "wcag": "3.3.1",
+    "principle": "Understandable",
+    "description": "Submitting an empty message produces no visible error message — only the border turns red.",
+    "file": "components/ChatInput.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "setHasError(true)",
+      "fixedWhen": "A visible, descriptive error message appears when the form is submitted empty"
+    },
+    "hint": "Display a text error message (e.g. 'Please enter a message') and associate it with the input using aria-describedby."
+  },
+  {
+    "id": 21,
+    "name": "Inconsistent Ivysaur",
+    "wcag": "3.2.3",
+    "principle": "Understandable",
+    "description": "Navigation links appear in a different order on the main page vs the gallery page.",
+    "file": "app/page.tsx",
+    "detection": {
+      "type": "manual",
+      "fixedWhen": "Navigation order is consistent across all pages"
+    },
+    "hint": "Use a shared navigation component to ensure consistent link ordering across pages."
+  },
+  {
+    "id": 22,
+    "name": "Buttonless Bulbasaur",
+    "wcag": "4.1.2",
+    "principle": "Robust",
+    "description": "The send button displays only a ▶ icon with no accessible name (no text, no aria-label).",
+    "file": "components/ChatInput.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "▶",
+      "fixedWhen": "Send button has visible text or aria-label=\"Send message\""
+    },
+    "hint": "Add aria-label=\"Send message\" or include visible text alongside the icon."
+  },
+  {
+    "id": 23,
+    "name": "Divvy Ditto",
+    "wcag": "4.1.2",
+    "principle": "Robust",
+    "description": "Interactive elements are implemented as <div onClick> instead of semantic <button> elements.",
+    "file": "components/ChatInput.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "<div\\s+onClick",
+      "fixedWhen": "All clickable elements use <button> instead of <div onClick>"
+    },
+    "hint": "Replace <div onClick> with <button>. Buttons provide keyboard support and screen reader semantics for free."
+  },
+  {
+    "id": 24,
+    "name": "Linkless Ledyba",
+    "wcag": "4.1.2",
+    "principle": "Robust",
+    "description": "An empty <a> tag exists with no text content, making it invisible to screen readers and meaningless.",
+    "file": "components/Header.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "<a href=\"#\"></a>",
+      "fixedWhen": "Empty link is removed or given meaningful text content"
+    },
+    "hint": "Remove empty links, or add meaningful text content and a valid href."
+  },
+  {
+    "id": 25,
+    "name": "Statusless Snorlax",
+    "wcag": "4.1.3",
+    "principle": "Robust",
+    "description": "Chat responses appear in the message area with no aria-live region, so screen readers are not notified of new content.",
+    "file": "components/ChatWindow.tsx",
+    "detection": {
+      "type": "code_pattern",
+      "pattern": "messages.map",
+      "fixedWhen": "Message container has aria-live=\"polite\" or uses a live region"
+    },
+    "hint": "Add aria-live=\"polite\" to the message container so screen readers announce new messages."
+  }
+]
