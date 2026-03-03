@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 import a11ymon from "@/data/a11ymon.json";
 import A11ymonImage from "@/components/A11ymonImage";
 
+export const dynamic = "force-dynamic";
+
 /** Image path for an A11ymon. Place images in public/a11ymon/ as 01.png, 02.png, etc. */
 function getA11ymonImageSrc(id: number): string {
   return `/a11ymon/${String(id).padStart(2, "0")}.png`;

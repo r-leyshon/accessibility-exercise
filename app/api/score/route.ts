@@ -16,30 +16,32 @@ export async function GET(req: NextRequest) {
 
   const deploymentUrl = `https://${host}`.replace(/\/$/, "");
   const prKeyFromQuery = req.nextUrl.searchParams.get("pr_key");
+  const prKeyFromEnv =
+    process.env.VERCEL_GIT_REPO_OWNER &&
+    process.env.VERCEL_GIT_REPO_SLUG &&
+    process.env.VERCEL_GIT_PULL_REQUEST_ID
+      ? `${process.env.VERCEL_GIT_REPO_OWNER}/${process.env.VERCEL_GIT_REPO_SLUG}#pr${process.env.VERCEL_GIT_PULL_REQUEST_ID}`
+      : null;
+  const prKey = prKeyFromQuery || prKeyFromEnv;
 
   try {
     const sql = neon(dbUrl);
-    let rows = await sql`
-      SELECT caught FROM deployment_scores
-      WHERE deployment_url = ${deploymentUrl}
-    `;
+    let rows: Array<{ caught?: unknown }> = [];
 
-    // Fallback: lookup by pr_key (from URL param or Vercel env — stable across redeploys)
-    if (rows.length === 0) {
-      const prKey =
-        prKeyFromQuery ||
-        (process.env.VERCEL_GIT_REPO_OWNER &&
-          process.env.VERCEL_GIT_REPO_SLUG &&
-          process.env.VERCEL_GIT_PULL_REQUEST_ID
-          ? `${process.env.VERCEL_GIT_REPO_OWNER}/${process.env.VERCEL_GIT_REPO_SLUG}#pr${process.env.VERCEL_GIT_PULL_REQUEST_ID}`
-          : null);
+    // For PRs: prefer pr_key lookup (stable across redeploys)
+    if (prKey) {
+      rows = await sql`
+        SELECT caught FROM deployment_scores
+        WHERE pr_key = ${prKey}
+      `;
+    }
 
-      if (prKey) {
-        rows = await sql`
-          SELECT caught FROM deployment_scores
-          WHERE pr_key = ${prKey}
-        `;
-      }
+    // Fallback: lookup by deployment URL (production or legacy)
+    if (!rows.length) {
+      rows = await sql`
+        SELECT caught FROM deployment_scores
+        WHERE deployment_url = ${deploymentUrl}
+      `;
     }
 
     const raw = rows[0]?.caught ?? [];
