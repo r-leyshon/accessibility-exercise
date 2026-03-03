@@ -5,8 +5,9 @@
  * Takes the bug checker scorecard and axe audit results
  * and produces a PR comment with caught/remaining tables and A11yDex link.
  *
- * Usage: node scripts/generate-report.mjs <scorecard.json> [axe-report.json] [preview-url]
+ * Usage: node scripts/generate-report.mjs <scorecard.json> [axe-report.json] [preview-url] [pr-key]
  * Output: Markdown PR comment to stdout
+ * pr-key: optional "owner/repo#prN" for PR-stable A11ydex link (works without Vercel system env vars)
  */
 
 import { readFileSync } from "fs";
@@ -14,6 +15,7 @@ import { readFileSync } from "fs";
 const scorecardPath = process.argv[2];
 const axeReportPath = process.argv[3];
 const previewUrl = process.argv[4]; // optional: Vercel preview URL for A11yDex link
+const prKey = process.argv[5]; // optional: owner/repo#prN for PR-stable lookup
 
 if (!scorecardPath) {
   console.error(
@@ -111,17 +113,18 @@ function buildScorecardMarkdown(scorecard) {
   return md;
 }
 
-function buildA11yDexLink(previewUrl) {
+function buildA11yDexLink(previewUrl, prKey) {
   if (!previewUrl || !previewUrl.startsWith("http")) return "";
   const base = previewUrl.replace(/\/$/, "");
-  return `\n\n[📖 View your A11yDex progress](${base}/a11ydex)\n`;
+  const qs = prKey ? `?pr_key=${encodeURIComponent(prKey)}` : "";
+  return `\n\n[📖 View your A11yDex progress](${base}/a11ydex${qs})\n`;
 }
 
 function main() {
   let markdown = buildScorecardMarkdown(scorecard);
 
   if (previewUrl) {
-    markdown += buildA11yDexLink(previewUrl);
+    markdown += buildA11yDexLink(previewUrl, prKey);
   }
 
   console.log(markdown);

@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
   }
 
   const deploymentUrl = `https://${host}`.replace(/\/$/, "");
+  const prKeyFromQuery = req.nextUrl.searchParams.get("pr_key");
 
   try {
     const sql = neon(dbUrl);
@@ -23,13 +24,15 @@ export async function GET(req: NextRequest) {
       WHERE deployment_url = ${deploymentUrl}
     `;
 
-    // Fallback: on Vercel preview, lookup by pr_key (stable across redeploys)
+    // Fallback: lookup by pr_key (from URL param or Vercel env — stable across redeploys)
     if (rows.length === 0) {
-      const repoOwner = process.env.VERCEL_GIT_REPO_OWNER;
-      const repoSlug = process.env.VERCEL_GIT_REPO_SLUG;
-      const prId = process.env.VERCEL_GIT_PULL_REQUEST_ID;
       const prKey =
-        repoOwner && repoSlug && prId ? `${repoOwner}/${repoSlug}#pr${prId}` : null;
+        prKeyFromQuery ||
+        (process.env.VERCEL_GIT_REPO_OWNER &&
+          process.env.VERCEL_GIT_REPO_SLUG &&
+          process.env.VERCEL_GIT_PULL_REQUEST_ID
+          ? `${process.env.VERCEL_GIT_REPO_OWNER}/${process.env.VERCEL_GIT_REPO_SLUG}#pr${process.env.VERCEL_GIT_PULL_REQUEST_ID}`
+          : null);
 
       if (prKey) {
         rows = await sql`
