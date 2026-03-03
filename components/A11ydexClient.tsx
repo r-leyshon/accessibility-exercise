@@ -13,6 +13,8 @@ export interface A11ymonBug {
   description: string;
   file: string;
   hint: string;
+  wcagUrl?: string;
+  detection?: { type: string };
 }
 
 const principleColours: Record<string, { bg: string; border: string; badge: string }> = {
@@ -26,10 +28,43 @@ function getA11ymonImageSrc(id: number): string {
   return `/a11ymon/${String(id).padStart(2, "0")}.png`;
 }
 
+const MANUAL_VERIFIED_KEY = "a11ydex-manual-verified";
+
+function getManualVerifiedIds(): Set<number> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = localStorage.getItem(MANUAL_VERIFIED_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch {
+    return new Set();
+  }
+}
+
 export default function A11ydexClient({ a11ymon }: { a11ymon: A11ymonBug[] }) {
   const searchParams = useSearchParams();
   const prKey = searchParams.get("pr_key");
   const [caughtIds, setCaughtIds] = useState<Set<number>>(new Set());
+  const [manualVerifiedIds, setManualVerifiedIds] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    setManualVerifiedIds(getManualVerifiedIds());
+  }, []);
+
+  const toggleManualVerified = (id: number) => {
+    setManualVerifiedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      try {
+        localStorage.setItem(MANUAL_VERIFIED_KEY, JSON.stringify([...next]));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     const url = new URL("/api/score", window.location.origin);
@@ -175,7 +210,10 @@ export default function A11ydexClient({ a11ymon }: { a11ymon: A11ymonBug[] }) {
                         src={getA11ymonImageSrc(bug.id)}
                         alt={`${bug.name} — accessibility bug`}
                         id={bug.id}
-                        caught={caughtIds.has(bug.id)}
+                        caught={
+                          caughtIds.has(bug.id) ||
+                          (bug.detection?.type === "manual" && manualVerifiedIds.has(bug.id))
+                        }
                       />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div
@@ -281,6 +319,57 @@ export default function A11ydexClient({ a11ymon }: { a11ymon: A11ymonBug[] }) {
                         {bug.hint}
                       </p>
                     </details>
+
+                    {bug.detection?.type === "manual" && (
+                      <div
+                        style={{
+                          marginTop: "12px",
+                          paddingTop: "12px",
+                          borderTop: `1px solid ${colours.border}`,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "8px",
+                        }}
+                      >
+                        {bug.wcagUrl && (
+                          <a
+                            href={bug.wcagUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              fontSize: "12px",
+                              color: colours.badge,
+                              textDecoration: "underline",
+                            }}
+                          >
+                            WCAG {bug.wcag} Understanding
+                          </a>
+                        )}
+                        <label
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            cursor: "pointer",
+                            fontSize: "13px",
+                            color: "#444",
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={manualVerifiedIds.has(bug.id)}
+                            onChange={() => toggleManualVerified(bug.id)}
+                            aria-label={`Self-assess: ${bug.name} verified`}
+                            style={{
+                              width: "16px",
+                              height: "16px",
+                              accentColor: colours.badge,
+                            }}
+                          />
+                          I&apos;ve verified this is fixed
+                        </label>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

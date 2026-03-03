@@ -27,7 +27,21 @@ export default function A11yDexPage() {
           </div>
         }
       >
-        <A11ydexClient a11ymon={a11ymon as Array<{ id: number; name: string; wcag: string; principle: string; description: string; file: string; hint: string }>} />
+        <A11ydexClient
+          a11ymon={
+            a11ymon as Array<{
+              id: number;
+              name: string;
+              wcag: string;
+              principle: string;
+              description: string;
+              file: string;
+              hint: string;
+              wcagUrl?: string;
+              detection?: { type: string };
+            }>
+          }
+        />
       </Suspense>
       <footer
         style={{

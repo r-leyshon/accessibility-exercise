@@ -27,7 +27,15 @@ export default function Disclaimer() {
         This website is <strong>intentionally designed with poor accessibility
         and bad UI patterns</strong> as a training exercise. Your mission: identify
         and fix as many accessibility issues as possible to make it WCAG 2.2 AA
-        compliant. Think of it as catching bugs in the wild!
+        compliant. Think of it as catching bugs in the wild!{" "}
+        <a
+          href="https://www.w3.org/WAI/WCAG22/Understanding/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#664d03", textDecoration: "underline" }}
+        >
+          WCAG 2.2 Understanding docs
+        </a>
       </p>
 
       <button

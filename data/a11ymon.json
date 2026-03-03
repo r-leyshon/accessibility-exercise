@@ -287,6 +287,7 @@
     "principle": "Understandable",
     "description": "Navigation links appear in a different order on the main page vs the gallery page.",
     "file": "app/page.tsx",
+    "wcagUrl": "https://www.w3.org/WAI/WCAG22/Understanding/consistent-navigation.html",
     "detection": {
       "type": "manual",
       "fixedWhen": "Navigation order is consistent across all pages"
