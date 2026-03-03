@@ -58,7 +58,20 @@ export async function GET(req: NextRequest) {
       ? raw.filter((n): n is number => typeof n === "number" && n >= 1 && n <= 25)
       : [];
     log("response", { ids, count: ids.length });
-    return Response.json({ caught: ids });
+
+    const debug = req.nextUrl.searchParams.get("debug");
+    const body: Record<string, unknown> = { caught: ids };
+    if (debug) {
+      body._debug = {
+        prKeyFromQuery: prKeyFromQuery ?? null,
+        prKeyFromEnv: prKeyFromEnv ?? null,
+        prKeyUsed: prKey ?? null,
+        deploymentUrl,
+        rowCount: rows.length,
+        hasDbUrl: !!dbUrl,
+      };
+    }
+    return Response.json(body);
   } catch (err) {
     log("error", err);
     return Response.json({ caught: [] });
