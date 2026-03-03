@@ -18,10 +18,26 @@ export async function GET(req: NextRequest) {
 
   try {
     const sql = neon(dbUrl);
-    const rows = await sql`
+    let rows = await sql`
       SELECT caught FROM deployment_scores
       WHERE deployment_url = ${deploymentUrl}
     `;
+
+    // Fallback: on Vercel preview, lookup by pr_key (stable across redeploys)
+    if (rows.length === 0) {
+      const repoOwner = process.env.VERCEL_GIT_REPO_OWNER;
+      const repoSlug = process.env.VERCEL_GIT_REPO_SLUG;
+      const prId = process.env.VERCEL_GIT_PULL_REQUEST_ID;
+      const prKey =
+        repoOwner && repoSlug && prId ? `${repoOwner}/${repoSlug}#pr${prId}` : null;
+
+      if (prKey) {
+        rows = await sql`
+          SELECT caught FROM deployment_scores
+          WHERE pr_key = ${prKey}
+        `;
+      }
+    }
 
     const raw = rows[0]?.caught ?? [];
     const ids = Array.isArray(raw)

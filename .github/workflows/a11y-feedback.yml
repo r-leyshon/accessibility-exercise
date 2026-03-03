@@ -77,6 +77,8 @@ jobs:
         if: steps.vercel.outputs.url != ''
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           if [ -n "$DATABASE_URL" ]; then
             node scripts/save-score.mjs "${{ steps.vercel.outputs.url }}" scorecard.json
