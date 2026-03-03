@@ -107,7 +107,7 @@ async function generateNarrative(scorecard) {
   }
 
   const vertexAI = new VertexAI({ project, location });
-  const model = vertexAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const model = vertexAI.getGenerativeModel({ model: "gemini-3.1-pro-preview" });
 
   const caught = scorecard.results.filter((r) => r.fixed === true);
   const remaining = scorecard.results.filter((r) => r.fixed === false);
