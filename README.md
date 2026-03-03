@@ -69,7 +69,7 @@ git commit -m "fix: resolve accessibility issues"
 git push -u origin access-audit/<your-github-username>
 ```
 
-Open a pull request against `main` on GitHub.
+Open a pull request against `main` on GitHub. Ensure the PR base branch is `main`.
 
 **What happens next:**
 
@@ -89,3 +89,18 @@ Open a pull request against `main` on GitHub.
 - [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/)
 - [GDS Service Manual — Accessibility](https://www.gov.uk/service-manual/helping-people-to-use-your-service/making-your-service-accessible-an-introduction)
 - [The A11y Project](https://www.a11yproject.com/)
+
+---
+
+## Automated audit pipeline
+
+When you open a PR, the workflow runs these tools:
+
+| Tool | Purpose |
+|------|---------|
+| **Custom bug checker** | Scans your source code for known-bad patterns defined in `data/a11ymon.json` (e.g. missing `alt`, `outline: none`, `tabIndex={5}`). Produces a score (e.g. 19/25) for the pattern-based bugs. |
+| **Playwright** | Launches a headless Chromium browser to load your deployed preview URL. |
+| **axe-core** | Runs an accessibility audit on the live page. Checks WCAG 2.0 A, 2.0 AA, 2.2 AA, and best-practice rules — contrast, landmarks, labels, focus, etc. |
+| **Report generator** | Merges the pattern checker and axe results into the PR comment, plus a link to your A11yDex progress page. |
+
+The workflow waits for your Vercel preview to be ready, then audits that deployed URL (not your local code). Both checks feed into your final score and feedback.
