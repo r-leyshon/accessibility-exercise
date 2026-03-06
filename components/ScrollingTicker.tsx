@@ -1,10 +1,6 @@
 "use client";
 
-/**
- * INTENTIONAL ACCESSIBILITY BUGS IN THIS FILE:
- * - Marquee Magikarp (2.2.2): auto-scrolling content with no pause/stop control
- * - Contrast Cubone (1.4.3): low contrast text
- */
+import { useState, useEffect } from "react";
 
 const tips = [
   "Did you know? 1 in 5 people in the UK have a disability.",
@@ -18,10 +14,21 @@ const tips = [
 ];
 
 export default function ScrollingTicker() {
+  const [paused, setPaused] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mq.matches);
+    const handler = () => setPrefersReducedMotion(mq.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  const shouldAnimate = !paused && !prefersReducedMotion;
   const tickerText = tips.join("  ★  ");
 
   return (
-    // BUG: Marquee Magikarp - no pause/stop button, auto-scrolls forever
     <div
       style={{
         overflow: "hidden",
@@ -33,17 +40,43 @@ export default function ScrollingTicker() {
     >
       <div
         style={{
-          display: "inline-block",
-          animation: "scroll-ticker 30s linear infinite",
-          // BUG: Contrast Cubone - #888 on #333 ≈ 3.0:1
-          color: "#888",
-          fontSize: "12px",
-          fontFamily: "'Comic Sans MS', cursive",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "16px",
         }}
       >
-        {tickerText}
-        &nbsp;&nbsp;&nbsp;&nbsp;
-        {tickerText}
+        <div
+          style={{
+            display: "inline-block",
+            animation: shouldAnimate ? "ticker-animation 30s linear infinite" : "none",
+            color: "#e5e5e5",
+            fontSize: "13px",
+            fontFamily: "'Comic Sans MS', cursive",
+          }}
+        >
+          {tickerText}
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          {tickerText}
+        </div>
+        {!prefersReducedMotion && (
+          <button
+            type="button"
+            onClick={() => setPaused(!paused)}
+            aria-label={paused ? "Resume scrolling" : "Pause scrolling"}
+            style={{
+              padding: "4px 8px",
+              fontSize: "13px",
+              backgroundColor: "#555",
+              color: "#fff",
+              border: "1px solid #666",
+              borderRadius: "4px",
+              cursor: "pointer",
+              flexShrink: 0,
+            }}
+          >
+            {paused ? "▶ Resume" : "⏸ Pause"}
+          </button>
+        )}
       </div>
     </div>
   );

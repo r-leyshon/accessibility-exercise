@@ -20,7 +20,7 @@ export default function A11yDexPage() {
             style={{
               padding: "32px",
               textAlign: "center",
-              color: "#999",
+              color: "#d1d5db",
             }}
           >
             Loading A11yDex…
@@ -47,8 +47,8 @@ export default function A11yDexPage() {
         style={{
           textAlign: "center",
           padding: "24px",
-          color: "#666",
-          fontSize: "12px",
+          color: "#d1d5db",
+          fontSize: "13px",
           borderTop: "1px solid #333",
         }}
       >

@@ -24,7 +24,7 @@ export default function A11ymonImage({ src, alt, id, caught = false }: A11ymonIm
           backgroundColor: "rgba(0,0,0,0.06)",
           borderRadius: "8px",
           border: "2px dashed rgba(0,0,0,0.15)",
-          color: "rgba(0,0,0,0.25)",
+          color: "#4b5563",
           fontSize: "32px",
           fontWeight: "bold",
           fontFamily: "monospace",

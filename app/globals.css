@@ -1,8 +1,7 @@
 @import "tailwindcss";
 
 /**
- * INTENTIONAL ACCESSIBILITY BUGS IN THIS FILE:
- * - Focusless Fearow (2.4.7): outline: none on all interactive elements
+ * Focus styles: visible outline on focus-visible for keyboard users.
  */
 
 :root {
@@ -18,9 +17,39 @@ body {
   padding: 0;
 }
 
-/* BUG: Focusless Fearow - removes all focus indicators */
-*:focus {
-  outline: none;
+*:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Skip-to-content link: off-screen until focused */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  z-index: 9999;
+  padding: 8px 16px;
+  background-color: #2563eb;
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: 4px;
+}
+.skip-link:focus {
+  left: 8px;
+  top: 8px;
+}
+
+/* Visually hidden but available to screen readers */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 a {
@@ -28,11 +57,11 @@ a {
 }
 
 input::placeholder {
-  color: #ddd;
+  color: #737373;
 }
 
 /* Ticker animation for ScrollingTicker */
-@keyframes scroll-ticker {
+@keyframes ticker-animation {
   0% {
     transform: translateX(0);
   }

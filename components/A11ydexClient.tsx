@@ -115,7 +115,7 @@ export default function A11ydexClient({ a11ymon }: { a11ymon: A11ymonBug[] }) {
             style={{
               margin: "4px 0 0",
               fontSize: "13px",
-              color: "#fca5a5",
+              color: "#fef2f2",
             }}
           >
             Gotta Fix &apos;Em All! &mdash;{" "}
@@ -134,7 +134,7 @@ export default function A11ydexClient({ a11ymon }: { a11ymon: A11ymonBug[] }) {
         <Link
           href={prKey ? `/?pr_key=${encodeURIComponent(prKey)}` : "/"}
           style={{
-            color: "#fca5a5",
+            color: "#fef2f2",
             fontSize: "14px",
             textDecoration: "underline",
           }}
@@ -162,7 +162,7 @@ export default function A11ydexClient({ a11ymon }: { a11ymon: A11ymonBug[] }) {
                   style={{
                     fontSize: "13px",
                     marginLeft: "8px",
-                    color: "#999",
+                    color: "#6b7280",
                     fontWeight: "normal",
                   }}
                 >
@@ -236,7 +236,7 @@ export default function A11ydexClient({ a11ymon }: { a11ymon: A11ymonBug[] }) {
                             display: "inline-block",
                             backgroundColor: colours.badge,
                             color: "#fff",
-                            fontSize: "10px",
+                            fontSize: "12px",
                             padding: "2px 8px",
                             borderRadius: "99px",
                             fontWeight: "bold",
@@ -263,7 +263,7 @@ export default function A11ydexClient({ a11ymon }: { a11ymon: A11ymonBug[] }) {
                       style={{
                         margin: "0 0 10px",
                         fontSize: "13px",
-                        color: "#444",
+                        color: "#374151",
                         lineHeight: 1.5,
                       }}
                     >
@@ -272,20 +272,20 @@ export default function A11ydexClient({ a11ymon }: { a11ymon: A11ymonBug[] }) {
 
                     <div
                       style={{
-                        fontSize: "11px",
-                        color: "#666",
+                        fontSize: "12px",
+                        color: "#374151",
                         borderTop: `1px solid ${colours.border}`,
                         paddingTop: "8px",
                         marginTop: "auto",
                       }}
                     >
-                      <span style={{ fontWeight: "bold", color: "#555" }}>File:</span>{" "}
+                      <span style={{ fontWeight: "bold", color: "#374151" }}>File:</span>{" "}
                       <code
                         style={{
                           backgroundColor: "rgba(0,0,0,0.06)",
                           padding: "1px 4px",
                           borderRadius: "3px",
-                          fontSize: "11px",
+                          fontSize: "12px",
                         }}
                       >
                         {bug.file}
@@ -296,7 +296,7 @@ export default function A11ydexClient({ a11ymon }: { a11ymon: A11ymonBug[] }) {
                       style={{
                         marginTop: "8px",
                         fontSize: "12px",
-                        color: "#555",
+                        color: "#4b5563",
                       }}
                     >
                       <summary

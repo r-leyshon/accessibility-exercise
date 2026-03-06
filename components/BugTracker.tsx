@@ -38,8 +38,7 @@ export default function BugTracker() {
         bottom: "16px",
         right: "16px",
         backgroundColor: "#dc2626",
-        color: "#fca5a5",
-        // BUG: Contrast Cubone - #fca5a5 on #dc2626 ≈ 2.3:1
+        color: "#fff",
         padding: "12px 16px",
         borderRadius: "12px",
         border: "3px solid #333",
@@ -55,22 +54,22 @@ export default function BugTracker() {
         transition: "transform 0.15s",
       }}
     >
-      {/* BUG: Heading Haunter - heading level skip */}
-      <h5
+      <span
         style={{
+          display: "block",
           margin: "0 0 4px 0",
-          fontSize: "11px",
+          fontSize: "12px",
           textTransform: "uppercase",
           letterSpacing: "1px",
-          color: "#fca5a5",
+          color: "#fff",
         }}
       >
         A11yDex
-      </h5>
+      </span>
       <div style={{ fontSize: "20px", fontWeight: "bold" }}>
         {caught !== null ? `${caught} / 25` : "… / 25"}
       </div>
-      <div style={{ fontSize: "10px", marginTop: "2px" }}>
+      <div style={{ fontSize: "12px", marginTop: "2px", color: "#fff" }}>
         A11ymon caught
       </div>
     </Link>

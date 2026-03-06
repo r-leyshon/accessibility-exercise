@@ -23,7 +23,9 @@ export default function Home() {
       <Header />
       <ScrollingTicker />
       <Disclaimer />
-      <ChatWindow />
+      <main id="main-content">
+        <ChatWindow />
+      </main>
       <Footer />
       <Suspense fallback={null}>
         <BugTracker />
